@@ -90,6 +90,5 @@ ENTRYPOINT [ \
     "--extensions-dir", "${VSCODE_HOME}/extensions", \
     "--user-data-dir", "${VSCODE_HOME}/data", \
     "--disable-telemetry", \
-    "--disable-update-check", \
     "." \
 ]
