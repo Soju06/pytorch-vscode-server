@@ -3,12 +3,8 @@ FROM pytorch/pytorch:2.2.2-cuda12.1-cudnn8-devel
 # ====================================
 # Build Arguments
 # ====================================
-# Set the timezone (Default: Asia/Seoul)
-ARG TIMEZONE=Asia/Seoul
 # Set the Python version (Default: 3.11.9)
 ARG PYTHON_VERSION=3.11.9
-# Set the Ubuntu APT mirror (Default: http://archive.ubuntu.com/ubuntu)
-ARG UBUNTU_APT_MIRROR=http://archive.ubuntu.com/ubuntu
 # Set the user and group (Default: ubuntu)
 ARG USER=ubuntu
 ARG GROUP=ubuntu
@@ -29,13 +25,6 @@ ENV HOME=/home/${USER}
 ENV WORKSPACE=/workspace
 # VSCode Server directory (Default: /workspace/.code-server)
 ENV VSCODE_HOME=${WORKSPACE}/.code-server
-
-# Set the timezone
-RUN ln -sf /usr/share/zoneinfo/${TIMEZONE} /etc/localtime
-
-# Change the apt source
-RUN sed -i 's|http://.*.ubuntu.com/ubuntu/|${UBUNTU_APT_MIRROR}|g' /etc/apt/sources.list
-RUN apt update
 
 # Install dependencies
 RUN apt update

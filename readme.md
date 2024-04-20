@@ -42,9 +42,7 @@ docker run -d \
 
 ### Build Arguments
 
-- `TIMEZONE`: Set the timezone. Default is `Asia/Seoul`
 - `PYTHON_VERSION`: Set the Python version. Default is `3.11.9`
-- `UBUNTU_APT_MIRROR`: Set the Ubuntu apt mirror. Default is `http://archive.ubuntu.com/ubuntu`
 - `USER`: Set the user name. Default is `ubuntu`
 - `GROUP`: Set the group name. Default is `ubuntu`
 - `UID`: Set the user id. Default is `1000`
