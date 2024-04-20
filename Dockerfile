@@ -91,6 +91,5 @@ ENTRYPOINT [ \
     "--user-data-dir", "${VSCODE_HOME}/data", \
     "--disable-telemetry", \
     "--disable-update-check", \
-    "--disable-crash-reporter", \
     "." \
 ]
