@@ -21,7 +21,7 @@ docker run -d \
   --gpus '"device=0"' \
   -e PASSWORD="your_vscode_password" \
   --name pytorch-vscode-server \
-  ghcr.io/Soju06/pytorch-vscode-server:2.2.2-cuda12.1
+  ghcr.io/soju06/pytorch-vscode-server:2.2.2-cuda12.1
 ```
 
 - Access VSCode Server: `https://localhost:5443`
@@ -37,7 +37,7 @@ docker run -d \
   -e PASSWORD="your_vscode_password" \
   -e SSH_PUBLIC_KEY="$(cat ~/.ssh/id_rsa.pub)" \
   --name pytorch-vscode-server \
-  ghcr.io/Soju06/pytorch-vscode-server:2.2.2-cuda12.1
+  ghcr.io/soju06/pytorch-vscode-server:2.2.2-cuda12.1
 ```
 
 ### Build Arguments
