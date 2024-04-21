@@ -1,5 +1,3 @@
-FROM pytorch/pytorch:2.2.2-cuda12.1-cudnn8-devel
-
 # ====================================
 # Build Arguments
 # ====================================
@@ -7,14 +5,33 @@ FROM pytorch/pytorch:2.2.2-cuda12.1-cudnn8-devel
 ARG UBUNTU_APT_MIRROR=""
 # Set the Python version (Default: 3.11.9)
 ARG PYTHON_VERSION=3.11.9
-# Set the Conda environment name (Default: pt311)
-ARG CONDA_ENVIRONMENT_NAME=pt311
+# Set the PyTorch version (Default: 2.2.2)
+ARG PYTORCH_VERSION=2.2.2
+# Set the CUDA version (Default: 12.1)
+ARG CUDA_VERSION=12.1
+# Set the Conda environment name (Default: pytorch)
+ARG CONDA_ENVIRONMENT_NAME=pytorch
 # Set the user and group (Default: ubuntu)
 ARG USER=ubuntu
 ARG GROUP=ubuntu
 # Set the user ID and group ID (Default: 1000)
 ARG UID=1000
 ARG GID=1000
+
+# Restore the original apt mirror after build. (Default: false)
+ARG RESTORE_MIRROR_AFTER_BUILD=false
+
+FROM pytorch/pytorch:${PYTORCH_VERSION}-cuda${CUDA_VERSION}-cudnn8-devel
+ARG UBUNTU_APT_MIRROR PYTHON_VERSION PYTORCH_VERSION CUDA_VERSION CONDA_ENVIRONMENT_NAME USER GROUP UID GID RESTORE_APT_MIRROR_AFTER_BUILD
+
+LABEL org.opencontainers.image.title="VSCode Server with PyTorch and CUDA"
+LABEL org.opencontainers.image.description="Docker images for machine learning development environments using CUDA and PyTorch and for remote development via VSCode and SSH server"
+LABEL org.opencontainers.image.authors="Soju06"
+LABEL org.opencontainers.image.vendor="Soju06"
+LABEL org.opencontainers.image.licenses="MIT"
+LABEL org.opencontainers.image.url="https://github.com/Soju06/docker-vscode-server"
+LABEL org.opencontainers.image.documentation="https://github.com/Soju06/docker-vscode-server"
+LABEL org.opencontainers.image.source="https://github.com/Soju06/docker-vscode-server"
 
 # ====================================
 # Environment Variables
@@ -31,7 +48,7 @@ ENV WORKSPACE=/workspace
 ENV VSCODE_HOME=${WORKSPACE}/.code-server
 
 # Change the apt source
-RUN if [ -n "${UBUNTU_APT_MIRROR}" ]; then sed -i "s|http://.*.ubuntu.com/ubuntu/|${UBUNTU_APT_MIRROR}|g" /etc/apt/sources.list; fi
+RUN if [ -n "${UBUNTU_APT_MIRROR}" ]; then sed -i "s|http://archive.ubuntu.com/ubuntu/|${UBUNTU_APT_MIRROR}|g" /etc/apt/sources.list; fi
 RUN apt update
 
 # Install dependencies
@@ -50,6 +67,7 @@ RUN apt install -y \
     
 # Clean up
 RUN apt clean && rm -rf /var/lib/apt/lists/*
+RUN if [ "${RESTORE_APT_MIRROR_AFTER_BUILD}" = "true" ]; then sed -i "s|${UBUNTU_APT_MIRROR}|http://archive.ubuntu.com/ubuntu/|g" /etc/apt/sources.list; fi
 
 # Create a non-root user
 RUN groupadd -g ${GID} ${GROUP} && \
@@ -58,9 +76,9 @@ RUN groupadd -g ${GID} ${GROUP} && \
     echo "${USER} ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
 RUN mkdir -p ${HOME}/.ssh
-RUN touch ${HOME}/.ssh/authorized_keys
 RUN chown -R ${UID}:${GID} ${HOME}/.ssh
 RUN chmod 700 ${HOME}/.ssh
+RUN touch ${HOME}/.ssh/authorized_keys
 RUN chmod 600 ${HOME}/.ssh/authorized_keys
 
 # Disable password authentication

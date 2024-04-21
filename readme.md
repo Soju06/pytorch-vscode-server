@@ -44,11 +44,14 @@ docker run -d \
 
 - `UBUNTU_APT_MIRROR`: Set the Ubuntu apt mirror. Default is `""`
 - `PYTHON_VERSION`: Set the Python version. Default is `3.11.9`
-- `CONDA_ENVIRONMENT_NAME`: Set the conda environment name. Default is `pt311`
+- `PYTORCH_VERSION`: Set the PyTorch version. Default is `2.2.2`
+- `CUDA_VERSION`: Set the CUDA version. Default is `12.1`
+- `CONDA_ENVIRONMENT_NAME`: Set the conda environment name. Default is `pytorch`
 - `USER`: Set the user name. Default is `ubuntu`
 - `GROUP`: Set the group name. Default is `ubuntu`
 - `UID`: Set the user id. Default is `1000`
 - `GID`: Set the group id. Default is `1000`
+- `RESTORE_MIRROR_AFTER_BUILD`: Restore the original apt mirror after build. Default is `true`
 
 ### Environment Variables
 
