@@ -5,7 +5,7 @@ Docker images for machine learning development environments using CUDA and PyTor
 ## Features
 
 - CUDA 12.1
-- Python 3.11.9
+- Python 3.11.9 (Conda)
 - PyTorch 2.2.2
 - Code Server
 - SSH Server
@@ -21,7 +21,7 @@ docker run -d \
   --gpus '"device=0"' \
   -e PASSWORD="your_vscode_password" \
   --name pytorch-vscode-server \
-  ghcr.io/soju06/pytorch-vscode-server:1.0.1-pytorch2.2.2-cuda12.1
+  ghcr.io/soju06/pytorch-vscode-server:1.0.2-pytorch2.2.2-cuda12.1
 ```
 
 - Access VSCode Server: `https://localhost:5443`
@@ -37,12 +37,14 @@ docker run -d \
   -e PASSWORD="your_vscode_password" \
   -e SSH_PUBLIC_KEY="$(cat ~/.ssh/id_rsa.pub)" \
   --name pytorch-vscode-server \
-  ghcr.io/soju06/pytorch-vscode-server:1.0.1-pytorch2.2.2-cuda12.1
+  ghcr.io/soju06/pytorch-vscode-server:1.0.2-pytorch2.2.2-cuda12.1
 ```
 
 ### Build Arguments
 
+- `UBUNTU_APT_MIRROR`: Set the Ubuntu apt mirror. Default is `""`
 - `PYTHON_VERSION`: Set the Python version. Default is `3.11.9`
+- `CONDA_ENVIRONMENT_NAME`: Set the conda environment name. Default is `pt311`
 - `USER`: Set the user name. Default is `ubuntu`
 - `GROUP`: Set the group name. Default is `ubuntu`
 - `UID`: Set the user id. Default is `1000`

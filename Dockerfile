@@ -3,8 +3,12 @@ FROM pytorch/pytorch:2.2.2-cuda12.1-cudnn8-devel
 # ====================================
 # Build Arguments
 # ====================================
+# Set the Ubuntu APT mirror (Default: "")
+ARG UBUNTU_APT_MIRROR=""
 # Set the Python version (Default: 3.11.9)
 ARG PYTHON_VERSION=3.11.9
+# Set the Conda environment name (Default: pt311)
+ARG CONDA_ENVIRONMENT_NAME=pt311
 # Set the user and group (Default: ubuntu)
 ARG USER=ubuntu
 ARG GROUP=ubuntu
@@ -26,8 +30,11 @@ ENV WORKSPACE=/workspace
 # VSCode Server directory (Default: /workspace/.code-server)
 ENV VSCODE_HOME=${WORKSPACE}/.code-server
 
-# Install dependencies
+# Change the apt source
+RUN if [ -n "${UBUNTU_APT_MIRROR}" ]; then sed -i "s|http://.*.ubuntu.com/ubuntu/|${UBUNTU_APT_MIRROR}|g" /etc/apt/sources.list; fi
 RUN apt update
+
+# Install dependencies
 RUN apt install -y \
     dumb-init \
     sudo \
@@ -40,14 +47,9 @@ RUN apt install -y \
     unzip \
     software-properties-common \
     build-essential
-
-# Install Python3.11
-RUN mkdir -p /tmp/python && curl -L https://www.python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VERSION}.tar.xz | tar -xJ -C /tmp/python
-RUN cd /tmp/python/Python-${PYTHON_VERSION} && ./configure --enable-optimizations && make altinstall && rm -rf /tmp/python
-
-# Install Python packages
-COPY ./requirements.txt /tmp/requirements.txt
-RUN pip install --upgrade pip && pip install -r /tmp/requirements.txt && rm /tmp/requirements.txt
+    
+# Clean up
+RUN apt clean && rm -rf /var/lib/apt/lists/*
 
 # Create a non-root user
 RUN groupadd -g ${GID} ${GROUP} && \
@@ -64,9 +66,6 @@ RUN chmod 600 ${HOME}/.ssh/authorized_keys
 # Disable password authentication
 RUN sed -i 's/#PasswordAuthentication yes/PasswordAuthentication no/' /etc/ssh/sshd_config
 
-# Clean up
-RUN apt clean && rm -rf /var/lib/apt/lists/*
-
 # Set the workspace
 RUN mkdir -p ${WORKSPACE}
 RUN chown -R ${UID}:${GID} ${WORKSPACE} ${HOME}
@@ -75,20 +74,26 @@ USER ${USER}
 WORKDIR ${WORKSPACE}
 
 # Install VSCode server
-RUN mkdir -p ${VSCODE_HOME}
+RUN mkdir -p $VSCODE_HOME
 RUN curl -fsSL https://code-server.dev/install.sh | sudo sh
+
+# Install Python
+RUN conda create -n ${CONDA_ENVIRONMENT_NAME} pytorch torchvision torchaudio pytorch-cuda=12.1 python==${PYTHON_VERSION} -c pytorch -c nvidia --yes
+COPY ./requirements.txt requirements.txt
+RUN conda init bash
+RUN bash -c "source activate ${CONDA_ENVIRONMENT_NAME} && pip install -r requirements.txt"
+RUN conda clean --all --yes && rm -rf ${HOME}/.cache/pip requirements.txt
+RUN echo "conda activate ${CONDA_ENVIRONMENT_NAME}" >> ${HOME}/.bashrc
 
 COPY ./entrypoint.sh /entrypoint.sh
 
 EXPOSE 22
 EXPOSE 443
 
-ENTRYPOINT [ \
-    "/entrypoint.sh", \
-    "code-server", \
-    "--bind-addr", "0.0.0.0:443", \
-    "--extensions-dir", "${VSCODE_HOME}/extensions", \
-    "--user-data-dir", "${VSCODE_HOME}/data", \
-    "--disable-telemetry", \
-    "." \
-]
+ENTRYPOINT /entrypoint.sh \
+    code-server \
+    --bind-addr 0.0.0.0:443 \
+    --extensions-dir ${VSCODE_HOME}/extensions \
+    --user-data-dir ${VSCODE_HOME}/data \
+    --disable-telemetry \
+    .
